@@ -19,19 +19,18 @@ defmodule Grid do
   end
 
   def configure_cells(grid) do
-    test = Enum.with_index(grid.cells) 
-    IO.inspect(test)
-    # TODO: This is not working correctly as the indices are wrong which is leading to an error
-    # I think this is showing the signs of a larger problem with updating cells as well
-    Enum.with_index(Enum.with_index(grid.cells)) |> Enum.map(fn {{column, row}, col} ->  
-      IO.puts(row)
-      IO.puts(col)
-      IO.inspect(column)
+    idxs =
+      for i <- 0..(grid.rows - 1),
+          j <- 0..(grid.cols - 1) do
+            {i, j}
+      end
+        
+    idxs |> Enum.map(fn {row, col} ->  
       north = get_cell(grid, row - 1, col)
       east = get_cell(grid, row, col + 1)
       south = get_cell(grid, row + 1, col)
       west = get_cell(grid, row, col - 1)
-      update_cell(grid, column, row, col, north, east, south, west)
+      update_cell(grid, row, col, north, east, south, west)
     end)
   end
 
@@ -56,11 +55,15 @@ defmodule Grid do
   end
 
   defp get_cell(grid, row, col) do
-    Enum.at(Enum.at(grid.cells, row), col)
+    case Enum.at(grid.cells, row) do
+      nil -> nil
+      cols -> Enum.at(cols, col)
+    end
   end
 
-  defp update_cell(grid, column, row, col, north, east, south, west) do
-    new_cell = Enum.at(column, col)
+  defp update_cell(grid, row, col, north, east, south, west) do
+    new_cell = Enum.at(grid.cells, row)
+    |> Enum.at(col)
     |> Cell.update_neighbors(north, east, south, west)
 
     new_col = Enum.at(grid.cells, row)
@@ -70,7 +73,4 @@ defmodule Grid do
     %{grid | cells: new_cells}
   end
 
-  defp index_to_row_col(size, index) do
-    
-  end
 end
