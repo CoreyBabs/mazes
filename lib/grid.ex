@@ -25,14 +25,11 @@ defmodule Grid do
             {i, j}
       end
     
-    # Should get_cell use acc or grid?
-    # Using acc keeps all of the nested neighbors, which could be useful,
-    # but makes the grid a lot more messy
     idxs |> Enum.reduce(grid, fn {row, col}, acc ->  
-      north = get_cell(grid, row - 1, col)
-      east = get_cell(grid, row, col + 1)
-      south = get_cell(grid, row + 1, col)
-      west = get_cell(grid, row, col - 1)
+      north = get_cell(acc, row - 1, col)
+      east = get_cell(acc, row, col + 1)
+      south = get_cell(acc, row + 1, col)
+      west = get_cell(acc, row, col - 1)
       update_cell_with_neighbors(acc, row, col, north, east, south, west)
     end)
   end
@@ -57,6 +54,9 @@ defmodule Grid do
     |> Enum.flat_map(fn col -> col end)
   end
 
+  def update_grid_with_cell(cell, grid) when cell == nil do
+    grid
+  end
   def update_grid_with_cell(cell, grid) do
     new_col = Enum.at(grid.cells, cell.row)
     |> List.update_at(cell.col, fn _ -> cell end)
@@ -65,10 +65,26 @@ defmodule Grid do
     %Grid{grid | cells: new_cells}
   end
 
-  defp get_cell(_grid, row, col) when row < 0 or col < 0 do
+  def update_grid_with_cells(grid, cells) do
+    Enum.reduce(cells, grid, fn cell, acc -> update_grid_with_cell(cell, acc) end)
+  end
+
+  def to_string(grid) do
+    output = "+" <> String.duplicate("---+", grid.cols) <> "\n"
+    each_row(grid)
+    |> Enum.reduce(output, fn row, acc -> 
+      top = "|"
+      bot = "+"
+      {top, bot} = Enum.reduce(row, {top, bot}, fn cell, {top, bot} -> Cell.to_string(cell, top, bot) end)
+      acc = acc <> top <> "\n"
+      acc <> bot <> "\n"
+    end)
+  end
+
+  def get_cell(_grid, row, col) when row < 0 or col < 0 do
     nil
   end  
-  defp get_cell(grid, row, col) do
+  def get_cell(grid, row, col) do
     case Enum.at(grid.cells, row) do
       nil -> nil
       cols -> Enum.at(cols, col)

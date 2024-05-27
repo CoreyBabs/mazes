@@ -7,16 +7,14 @@ defmodule Cell do
 
   def link(cell, linked) do
     new_links = cell.links
-    new_links = Map.put(new_links, linked, true)
-    cell = %{cell | links: new_links}
-
-    cell
+    new_links = Map.put(new_links, {linked.row, linked.col}, true)
+    %Cell{cell | links: new_links}
   end
 
   def unlink(cell, linked) do
     new_links = cell.links
-    new_links = Map.delete(new_links, linked)
-    cell = %{cell | links: new_links}
+    new_links = Map.delete(new_links, {linked.row, linked.col})
+    cell = %Cell{cell | links: new_links}
 
     cell
   end
@@ -26,7 +24,10 @@ defmodule Cell do
   end
 
   def linked?(cell, other_cell) do
-    Map.has_key?(cell.links, other_cell)
+    case other_cell do
+      nil -> false
+      _ -> Map.has_key?(cell.links, {other_cell.row, other_cell.col})
+    end
   end
 
   def link_cells(cell, linked) do
@@ -50,6 +51,19 @@ defmodule Cell do
 
   def update_neighbors(cell, north, east, south, west) do
     %Cell{cell | north: north, east: east, south: south, west: west} 
+  end
+
+  def to_string(cell, top, bot) do
+    body = "   "
+    east_boundary = if linked?(cell, cell.east), do: " ", else: "|"
+    top = top <> body <> east_boundary
+
+    south_boundary = if linked?(cell, cell.south), do: "   ", else: "---"
+    IO.puts("South Boundary is " <> south_boundary)
+    corner = "+"
+    bot = bot <> south_boundary <> corner
+
+    {top, bot}
   end
 
 end

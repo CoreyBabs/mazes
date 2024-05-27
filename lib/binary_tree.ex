@@ -1,9 +1,12 @@
 defmodule BinaryTree do
   def on(grid) do
-    Grid.each_cell(grid)
+    grid = Grid.each_cell(grid)
     |> Enum.reduce(grid, fn cell, acc ->
-      update_cell_with_neighbors(cell)
-      |> Grid.update_grid_with_cell(acc) end)
+      cells = update_cell_with_neighbors(cell)
+      Grid.update_grid_with_cells(acc, Tuple.to_list(cells)) end)
+
+    IO.inspect(grid)
+    grid
   end
 
   defp update_cell_with_neighbors(cell) do
@@ -19,10 +22,10 @@ defmodule BinaryTree do
     end
 
     case neighbors do
-      [] -> cell
+      [] -> {cell, nil}
       list -> 
         neighbor = Enum.random(list)
-        Cell.link(cell, neighbor)
+        Cell.link_cells(cell, neighbor)
     end
   end
 end
