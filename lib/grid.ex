@@ -51,7 +51,7 @@ defmodule Grid do
 
   def each_cell(grid) do
     each_row(grid)
-    |> Stream.each(fn col -> col end)
+    |> Stream.flat_map(fn col -> col end)
   end
 
   defp get_cell(_grid, row, col) when row < 0 or col < 0 do
