@@ -25,12 +25,15 @@ defmodule Grid do
             {i, j}
       end
     
+    # Should get_cell use acc or grid?
+    # Using acc keeps all of the nested neighbors, which could be useful,
+    # but makes the grid a lot more messy
     idxs |> Enum.reduce(grid, fn {row, col}, acc ->  
       north = get_cell(grid, row - 1, col)
       east = get_cell(grid, row, col + 1)
       south = get_cell(grid, row + 1, col)
       west = get_cell(grid, row, col - 1)
-      update_cell(acc, row, col, north, east, south, west)
+      update_cell_with_neighbors(acc, row, col, north, east, south, west)
     end)
   end
 
@@ -46,12 +49,20 @@ defmodule Grid do
   end
 
   def each_row(grid) do
-    Stream.each(grid.cells, fn row -> row end)
+    Enum.map(grid.cells, fn row -> row end)
   end
 
   def each_cell(grid) do
     each_row(grid)
-    |> Stream.flat_map(fn col -> col end)
+    |> Enum.flat_map(fn col -> col end)
+  end
+
+  def update_grid_with_cell(cell, grid) do
+    new_col = Enum.at(grid.cells, cell.row)
+    |> List.update_at(cell.col, fn _ -> cell end)
+
+    new_cells = List.update_at(grid.cells, cell.row, fn _ -> new_col end)
+    %Grid{grid | cells: new_cells}
   end
 
   defp get_cell(_grid, row, col) when row < 0 or col < 0 do
@@ -64,16 +75,12 @@ defmodule Grid do
     end
   end
 
-  defp update_cell(grid, row, col, north, east, south, west) do
+  defp update_cell_with_neighbors(grid, row, col, north, east, south, west) do
     new_cell = Enum.at(grid.cells, row)
     |> Enum.at(col)
     |> Cell.update_neighbors(north, east, south, west)
 
-    new_col = Enum.at(grid.cells, row)
-    |> List.update_at(col, fn _ -> new_cell end)
-
-    new_cells = List.update_at(grid.cells, row, fn _ -> new_col end)
-    %Grid{grid | cells: new_cells}
+    update_grid_with_cell(new_cell, grid)
   end
 
 end
