@@ -24,13 +24,13 @@ defmodule Grid do
           j <- 0..(grid.cols - 1) do
             {i, j}
       end
-        
-    idxs |> Enum.map(fn {row, col} ->  
+    
+    idxs |> Enum.reduce(grid, fn {row, col}, acc ->  
       north = get_cell(grid, row - 1, col)
       east = get_cell(grid, row, col + 1)
       south = get_cell(grid, row + 1, col)
       west = get_cell(grid, row, col - 1)
-      update_cell(grid, row, col, north, east, south, west)
+      update_cell(acc, row, col, north, east, south, west)
     end)
   end
 
@@ -54,6 +54,9 @@ defmodule Grid do
     |> Stream.each(fn col -> col end)
   end
 
+  defp get_cell(_grid, row, col) when row < 0 or col < 0 do
+    nil
+  end  
   defp get_cell(grid, row, col) do
     case Enum.at(grid.cells, row) do
       nil -> nil
@@ -70,7 +73,7 @@ defmodule Grid do
     |> List.update_at(col, fn _ -> new_cell end)
 
     new_cells = List.update_at(grid.cells, row, fn _ -> new_col end)
-    %{grid | cells: new_cells}
+    %Grid{grid | cells: new_cells}
   end
 
 end
