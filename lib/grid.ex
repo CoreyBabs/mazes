@@ -26,10 +26,10 @@ defmodule Grid do
       end
     
     idxs |> Enum.reduce(grid, fn {row, col}, acc ->  
-      north = get_cell(acc, row - 1, col)
-      east = get_cell(acc, row, col + 1)
-      south = get_cell(acc, row + 1, col)
-      west = get_cell(acc, row, col - 1)
+      north = get_cell(acc, row - 1, col) |> Cell.get_row_col()
+      east = get_cell(acc, row, col + 1) |> Cell.get_row_col()
+      south = get_cell(acc, row + 1, col) |> Cell.get_row_col()
+      west = get_cell(acc, row, col - 1) |> Cell.get_row_col()
       update_cell_with_neighbors(acc, row, col, north, east, south, west)
     end)
   end

@@ -23,6 +23,9 @@ defmodule Cell do
     Map.keys(cell.links)
   end
 
+  def linked?(cell, other_cell) when is_tuple(other_cell) do
+    Map.has_key?(cell.links, other_cell)
+  end
   def linked?(cell, other_cell) do
     case other_cell do
       nil -> false
@@ -64,6 +67,13 @@ defmodule Cell do
     bot = bot <> south_boundary <> corner
 
     {top, bot}
+  end
+
+  def get_row_col(cell) do
+    case cell do
+      nil -> nil
+      c -> {c.row, c.col}
+    end
   end
 
 end
