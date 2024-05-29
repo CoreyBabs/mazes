@@ -25,7 +25,7 @@ defmodule BinaryTree do
       [] -> {cell, nil}
       list -> 
         neighbor = Enum.random(list)
-        Cell.link_cells(cell, Grid.get_cell(grid, elem(neighbor, 0), elem(neighbor, 1)))
+        Cell.link_cells(cell, Grid.get_cell(grid, neighbor))
     end
   end
 end

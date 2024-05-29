@@ -62,7 +62,6 @@ defmodule Cell do
     top = top <> body <> east_boundary
 
     south_boundary = if linked?(cell, cell.south), do: "   ", else: "---"
-    IO.puts("South Boundary is " <> south_boundary)
     corner = "+"
     bot = bot <> south_boundary <> corner
 

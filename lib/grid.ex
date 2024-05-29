@@ -90,6 +90,15 @@ defmodule Grid do
       cols -> Enum.at(cols, col)
     end
   end
+  def get_cell(_grid, {row, col}) when row < 0 or col < 0 do
+    nil
+  end
+  def get_cell(grid, {row, col}) do
+    case Enum.at(grid.cells, row) do
+      nil -> nil
+      cols -> Enum.at(cols, col)
+    end
+  end
 
   defp update_cell_with_neighbors(grid, row, col, north, east, south, west) do
     new_cell = Enum.at(grid.cells, row)
