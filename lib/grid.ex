@@ -81,6 +81,19 @@ defmodule Grid do
     end)
   end
 
+  def to_png(grid, cell_size) do
+    cell_size = cell_size * 10
+    img_width = cell_size * grid.cols
+    img_height = cell_size * grid.rows
+
+    wall = ExPng.Color.black()
+
+    img = ExPng.Image.new(img_width + 1, img_height + 1)
+
+    each_cell(grid)
+    |> Enum.reduce(img, fn cell, acc -> Cell.to_image(cell, acc, cell_size, wall) end) 
+  end
+
   def get_cell(_grid, row, col) when row < 0 or col < 0 do
     nil
   end  

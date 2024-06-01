@@ -68,6 +68,33 @@ defmodule Cell do
     {top, bot}
   end
 
+  def to_image(cell, image, cell_size, wall) do
+    x1 = cell.col * cell_size
+    y1 = cell.row * cell_size
+    x2 = (cell.col + 1) * cell_size
+    y2 = (cell.row + 1) * cell_size
+
+    image = case cell.north do
+      nil -> ExPng.Image.line(image, {x1, y1}, {x2, y1}, wall)
+      _neighbor -> image 
+    end
+
+    image = case cell.west do
+      nil -> ExPng.Image.line(image, {x1, y1}, {x1, y2}, wall)
+      _neighbor -> image
+    end
+
+    image = case linked?(cell, cell.east) do
+      true -> image 
+      false -> ExPng.Image.line(image, {x2, y1}, {x2, y2}, wall)
+    end
+
+    case linked?(cell, cell.south) do
+      true -> image
+      false -> ExPng.Image.line(image, {x1, y2}, {x2, y2}, wall)
+    end
+  end
+
   def get_row_col(cell) do
     case cell do
       nil -> nil
