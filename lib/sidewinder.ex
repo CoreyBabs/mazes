@@ -20,20 +20,20 @@ defmodule Sidewinder do
   end
 
   defp update_cell(grid, cell, run) do
-    run = run ++ [cell] 
-
+    new_run = run ++ [cell]
     at_east = cell.east == nil
     at_north = cell.north == nil
 
     should_close = at_east || (!at_north && Enum.random(0..1) == 0)
     do_nothing = at_east && at_north
-    IO.inspect({should_close, do_nothing})
+
 
     case {should_close, do_nothing} do
-      {true, false} -> member = Enum.random(run)
-              run = []
-              {Cell.link_cells(member, Grid.get_cell(grid, member.north)), run}
-      {false, false} -> {Cell.link_cells(cell, Grid.get_cell(grid, cell.east)), run}
+      {true, false} -> member = Enum.random(new_run)
+              {Cell.link_cells(member, Grid.get_cell(grid, member.north)), []}
+      {false, false} -> 
+        {new_cell, linked_cell} = Cell.link_cells(cell, Grid.get_cell(grid, cell.east))
+        {{new_cell, linked_cell}, run ++ [new_cell]}
       {_, _} -> {{nil, nil}, []}
     end
   end

@@ -12,4 +12,15 @@ defmodule SidewinderDemo do
     |> Grid.to_png(10)
     |> ExPng.Image.to_file("./images/sidewinder.png")
   end
+
+  def demo_both() do
+    grid = Grid.initialize(4, 4)
+    |> Sidewinder.on()
+
+    Grid.to_string(grid)
+    |> IO.puts()
+
+    Grid.to_png(grid, 10)
+    |> ExPng.Image.to_file("./images/sidewinder.png")
+  end
 end
