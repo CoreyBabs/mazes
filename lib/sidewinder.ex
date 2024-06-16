@@ -1,11 +1,9 @@
 defmodule Sidewinder do
 
   def on(grid) do
-    grid = Grid.each_row(grid)
+    Grid.each_row(grid)
     |> Enum.reduce(grid, fn row, acc -> update_row(acc, row) end)
 
-    IO.inspect(grid)
-    grid
   end
 
   defp update_row(grid, row) do
@@ -20,6 +18,7 @@ defmodule Sidewinder do
   end
 
   defp update_cell(grid, cell, run) do
+    cell = Grid.get_cell(grid, Cell.get_row_col(cell))
     new_run = run ++ [cell]
     at_east = cell.east == nil
     at_north = cell.north == nil

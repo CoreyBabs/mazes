@@ -69,13 +69,13 @@ defmodule Grid do
     Enum.reduce(cells, grid, fn cell, acc -> update_grid_with_cell(cell, acc) end)
   end
 
-  def to_string(grid) do
+  def to_string(grid, distances \\ nil) do
     output = "+" <> String.duplicate("---+", grid.cols) <> "\n"
     each_row(grid)
     |> Enum.reduce(output, fn row, acc -> 
       top = "|"
       bot = "+"
-      {top, bot} = Enum.reduce(row, {top, bot}, fn cell, {top, bot} -> Cell.to_string(cell, top, bot) end)
+      {top, bot} = Enum.reduce(row, {top, bot}, fn cell, {top, bot} -> Cell.to_string(cell, top, bot, distances) end)
       acc = acc <> top <> "\n"
       acc <> bot <> "\n"
     end)
@@ -121,4 +121,31 @@ defmodule Grid do
     update_grid_with_cell(new_cell, grid)
   end
 
+  def distances_from_cell(grid, cell) do
+    distances = Distances.initialize(cell)
+    frontier = [cell]
+
+    distances_from_cell(grid, distances, frontier)
+  end
+
+  defp distances_from_cell(grid, distances, frontier) do
+    case frontier do
+      [] -> distances
+      _f -> 
+        {distances, frontier} = Enum.reduce(frontier, {distances, frontier}, fn c, {acc, nf} -> 
+          Enum.reduce(c.links, {acc, nf}, fn {linked, _}, {acc_d, acc_f} -> 
+            distances_of_linked(grid, acc_d, c, linked, acc_f)
+          end)
+        end)
+
+        distances_from_cell(grid, distances, frontier)
+    end
+  end
+
+  defp distances_of_linked(grid, distances, cell, linked, frontier) do
+    case Distances.distance(distances, linked) do
+      nil -> {Distances.put(distances, linked, Distances.distance(distances, cell) + 1), frontier ++ [get_cell(grid, linked)]}
+      _distance -> {distances, List.delete(frontier, cell)}
+    end
+  end
 end

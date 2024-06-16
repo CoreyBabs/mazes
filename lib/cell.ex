@@ -14,9 +14,7 @@ defmodule Cell do
   def unlink(cell, linked) do
     new_links = cell.links
     new_links = Map.delete(new_links, {linked.row, linked.col})
-    cell = %Cell{cell | links: new_links}
-
-    cell
+    %Cell{cell | links: new_links}
   end
 
   def links(cell) do
@@ -35,7 +33,7 @@ defmodule Cell do
 
   def link_cells(cell, linked) do
     new_cell = link(cell, linked)
-    new_linked = link(linked, cell)
+    new_linked = link(linked, new_cell)
 
     {new_cell, new_linked}
   end
@@ -56,8 +54,8 @@ defmodule Cell do
     %Cell{cell | north: north, east: east, south: south, west: west} 
   end
 
-  def to_string(cell, top, bot) do
-    body = "   "
+  def to_string(cell, top, bot, distances \\ nil) do
+    body = contents_of(cell, distances)
     east_boundary = if linked?(cell, cell.east), do: " ", else: "|"
     top = top <> body <> east_boundary
 
@@ -66,6 +64,16 @@ defmodule Cell do
     bot = bot <> south_boundary <> corner
 
     {top, bot}
+  end
+
+  defp contents_of(cell, distances) do
+    case distances do
+      nil -> "   "
+      _ -> case Distances.distance(distances, cell) do
+        nil -> "-1 " 
+        d -> " #{Integer.to_string(d, 36)} "
+      end
+    end
   end
 
   def to_image(cell, image, cell_size, wall) do
