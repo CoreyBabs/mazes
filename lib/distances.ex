@@ -1,10 +1,17 @@
 defmodule Distances do
   defstruct [:root, :cells]
 
+  def initialize(root) when is_tuple(root) do
+    new(root)
+  end
   def initialize(root) do
     cell = Cell.get_row_col(root)
-    cells = %{cell => 0}
-    %Distances{root: cell, cells: cells}
+    new(cell)
+  end
+
+  defp new(root) do
+    cells = %{root => 0}
+    %Distances{root: root, cells: cells}
   end
 
   def distance(distances, cell) when is_tuple(cell) do
@@ -23,5 +30,29 @@ defmodule Distances do
 
   def cells(distances) do
     Map.keys(distances)
+  end
+
+  def path_to(grid, distances, goal) do
+    current = Cell.get_row_col(goal)
+    current_distance = distance(distances, current)
+    breadcrumbs = Distances.initialize(distances.root)
+    |> put(current, current_distance)
+    path_to(grid, distances, breadcrumbs, current)
+  end
+
+  defp path_to(grid, distances, breadcrumbs, current) do
+    if current == distances.root do
+      breadcrumbs
+    else
+      current_cell = Grid.get_cell(grid, current)
+      {neighbor, min_distance} = get_shortest_neighbor(distances, current_cell)
+      breadcrumbs = put(breadcrumbs, neighbor, min_distance)
+      path_to(grid, distances, breadcrumbs, neighbor)
+    end
+  end
+
+  defp get_shortest_neighbor(distances, current) do
+    Enum.map(current.links, fn {k, _v} -> {k, distance(distances, k)} end)
+    |> Enum.min_by(fn {_, d} -> d end) 
   end
 end

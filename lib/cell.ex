@@ -70,7 +70,7 @@ defmodule Cell do
     case distances do
       nil -> "   "
       _ -> case Distances.distance(distances, cell) do
-        nil -> "-1 " 
+        nil -> "   " 
         d -> " #{Integer.to_string(d, 36)} "
       end
     end
