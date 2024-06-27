@@ -76,6 +76,17 @@ defmodule Cell do
     end
   end
 
+  def background_color(dist, max) when max == 0 do
+    color = case dist do
+      nil -> ExPng.Color.white()
+      _d -> ExPng.Color.rgb(0, 0, 128)
+    end
+
+    case dist do
+      nil -> ExPng.Color.white()
+      _d -> color
+    end
+  end
   def background_color(dist, max) do
     case dist do
       nil -> ExPng.Color.white()
