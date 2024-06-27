@@ -76,15 +76,37 @@ defmodule Cell do
     end
   end
 
-  def to_image(cell, image, cell_size, wall) do
+  def background_color(dist, max) do
+    case dist do
+      nil -> ExPng.Color.white()
+      d -> 
+        intensity = (max - d) / max
+        dark = Float.round(255 * intensity) |> trunc()
+        bright = 128 + Float.round(127 * intensity) |> trunc()
+        ExPng.Color.rgb(dark, dark, bright)
+    end
+  end
+
+  def draw_background(cell, image, cell_size, bg) do
     x1 = cell.col * cell_size
-    y1 = cell.row * cell_size
+    y1 = cell.row * cell_size 
+    x2 = (cell.col + 1) * cell_size
+    y2 = (cell.row + 1) * cell_size
+
+    Enum.reduce(x1..x2, image, fn x, acc ->
+      ExPng.Image.line(acc, {x, y1}, {x, y2}, bg)
+    end)
+  end
+
+  def draw_walls(cell, image, cell_size, wall) do
+    x1 = cell.col * cell_size
+    y1 = cell.row * cell_size 
     x2 = (cell.col + 1) * cell_size
     y2 = (cell.row + 1) * cell_size
 
     image = case cell.north do
       nil -> ExPng.Image.line(image, {x1, y1}, {x2, y1}, wall)
-      _neighbor -> image 
+      _neighbor -> image
     end
 
     image = case cell.west do
@@ -93,7 +115,7 @@ defmodule Cell do
     end
 
     image = case linked?(cell, cell.east) do
-      true -> image 
+      true -> image
       false -> ExPng.Image.line(image, {x2, y1}, {x2, y2}, wall)
     end
 

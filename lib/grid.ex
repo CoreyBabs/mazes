@@ -91,7 +91,33 @@ defmodule Grid do
     img = ExPng.Image.new(img_width + 1, img_height + 1)
 
     each_cell(grid)
-    |> Enum.reduce(img, fn cell, acc -> Cell.to_image(cell, acc, cell_size, wall) end) 
+    |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall) end) 
+  end
+
+  def to_png_with_color(grid, cell_size, distances, max) do
+    cell_size = cell_size * 10
+    img_width = cell_size * grid.cols
+    img_height = cell_size * grid.rows
+
+    wall = ExPng.Color.black()
+
+    img = ExPng.Image.new(img_width + 1, img_height + 1)
+
+    img = case distances do
+      nil -> img
+      dists -> each_cell(grid)
+        |> Enum.reduce(img, fn cell, acc ->
+          dist = Distances.distance(dists, cell)
+          Cell.draw_background(
+            cell,
+            acc,
+            cell_size,
+            Cell.background_color(dist, max))
+        end) 
+    end
+
+    each_cell(grid)
+    |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall) end) 
   end
 
   def get_cell(_grid, row, col) when row < 0 or col < 0 do
