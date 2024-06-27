@@ -55,4 +55,16 @@ defmodule Distances do
     Enum.map(current.links, fn {k, _v} -> {k, distance(distances, k)} end)
     |> Enum.min_by(fn {_, d} -> d end) 
   end
+
+  def max(distances) do
+    max_distance = 0
+    max_cell = distances.root
+    Enum.reduce(distances.cells, {max_cell, max_distance}, fn {cell, distance}, {acc_c, acc_d} -> 
+      if distance > acc_d do
+        {cell, distance}
+      else
+        {acc_c, acc_d}
+      end
+    end)
+  end
 end
