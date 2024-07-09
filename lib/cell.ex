@@ -143,4 +143,8 @@ defmodule Cell do
     end
   end
 
+  def eq?(cell, other) do
+    cell.row === other.row && cell.col === other.col
+  end
+
 end
