@@ -154,6 +154,13 @@ defmodule Grid do
     distances_from_cell(grid, distances, frontier)
   end
 
+  def deadends(grid) do
+    Grid.each_cell(grid)
+    |> Enum.filter(fn cell -> Cell.links(cell)
+      |> length() == 1
+    end)
+  end
+
   defp distances_from_cell(grid, distances, frontier) do
     case frontier do
       [] -> distances
