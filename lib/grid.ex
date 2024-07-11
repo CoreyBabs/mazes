@@ -1,6 +1,6 @@
 defmodule Grid do
 
-  defstruct [:rows, :cols, :cells]
+  defstruct [:rows, :cols, :cells, mask: nil]
 
   def initialize(rows, cols) do
     %Grid{rows: rows, cols: cols} 
@@ -8,32 +8,41 @@ defmodule Grid do
     |> configure_cells()
   end
   
+  def initialize(mask) do
+    %Grid{rows: mask.rows, cols: mask.cols, mask: mask} 
+    |> prepare_grid()
+    |> configure_cells()
+  end
+
   def prepare_grid(grid) do
     cells = Enum.map(0..grid.rows - 1, fn row ->
       Enum.map(0..grid.cols - 1, fn col ->
-        Cell.initialize(row, col)
+        if grid.mask == nil or Mask.get(grid.mask, row, col) do
+          Cell.initialize(row, col)
+        else
+          nil
+        end
       end)
     end) 
-
     %Grid{grid | cells: cells}
   end
 
   def configure_cells(grid) do
-    idxs =
-      for i <- 0..(grid.rows - 1),
-          j <- 0..(grid.cols - 1) do
-            {i, j}
-      end
-    
-    idxs |> Enum.reduce(grid, fn {row, col}, acc ->  
-      north = get_cell(acc, row - 1, col) |> Cell.get_row_col()
-      east = get_cell(acc, row, col + 1) |> Cell.get_row_col()
-      south = get_cell(acc, row + 1, col) |> Cell.get_row_col()
-      west = get_cell(acc, row, col - 1) |> Cell.get_row_col()
-      update_cell_with_neighbors(acc, row, col, north, east, south, west)
+    each_cell(grid)
+    |> Enum.filter(fn c -> c != nil end)
+    |> Enum.reduce(grid, fn cell, acc ->  
+      north = get_cell(acc, cell.row - 1, cell.col) |> Cell.get_row_col()
+      east = get_cell(acc, cell.row, cell.col + 1) |> Cell.get_row_col()
+      south = get_cell(acc, cell.row + 1, cell.col) |> Cell.get_row_col()
+      west = get_cell(acc, cell.row, cell.col - 1) |> Cell.get_row_col()
+      update_cell_with_neighbors(acc, cell.row, cell.col, north, east, south, west)
     end)
   end
 
+  def random_cell(grid) when grid.mask != nil do
+    {rand_row, rand_col} = Mask.random_location(grid.mask)
+    get_cell(grid, rand_row, rand_col)
+  end
   def random_cell(grid) do
     rand_row = Enum.random(0..grid.rows - 1)
     rand_col = Enum.random(0..grid.cols - 1)
@@ -42,7 +51,10 @@ defmodule Grid do
   end
 
   def size(grid) do
-    grid.rows * grid.cols
+    case grid.mask do
+      nil -> grid.rows * grid.cols
+      _ -> Mask.count(grid.mask)
+    end
   end
 
   def each_row(grid) do

@@ -55,6 +55,11 @@ defmodule Cell do
   end
 
   def to_string(cell, top, bot, distances \\ nil) do
+    cell = if cell == nil do
+      Cell.initialize(-1, -1)
+    else
+      cell
+    end
     body = contents_of(cell, distances)
     east_boundary = if linked?(cell, cell.east), do: " ", else: "|"
     top = top <> body <> east_boundary
