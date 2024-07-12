@@ -69,4 +69,35 @@ defmodule Mask do
       false -> random_location(mask)
     end
   end
+
+  def from_txt(file) do
+    lines = File.read!(file)
+    |> String.trim()
+    |> String.split("\n")
+    |> Enum.map(fn line -> String.trim(line) end)
+
+    rows = length(lines)
+    cols = Enum.at(lines, 0) |> String.length()
+    mask = initialize(rows, cols)
+    
+    Enum.reduce(0..rows - 1, mask, fn row, acc ->
+      Enum.reduce(0..cols - 1, acc, fn col, acc_m ->
+        char = Enum.at(lines, row) |> String.at(col)  
+        set(acc_m, row, col, char != "X")
+      end)
+    end) 
+  end
+
+  def from_png(file) do
+    {:ok, image} = ExPng.Image.from_file(file)
+    mask = initialize(image.width, image.height)
+
+    Enum.reduce(0..mask.rows - 1, mask, fn row, acc ->
+      Enum.reduce(0..mask.cols - 1, acc, fn col, acc_m ->
+        pixel = ExPng.Image.at(image, {col, row})  
+        set(acc_m, row, col, pixel != ExPng.Color.black())
+      end)
+    end) 
+
+  end
 end

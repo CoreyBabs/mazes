@@ -114,6 +114,9 @@ defmodule Cell do
     end)
   end
 
+  def draw_walls(cell, image, _cell_size, _wall) when cell == nil do
+    image
+  end
   def draw_walls(cell, image, cell_size, wall) do
     x1 = cell.col * cell_size
     y1 = cell.row * cell_size 
