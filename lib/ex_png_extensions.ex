@@ -18,8 +18,6 @@ defmodule ExPngExtensions do
     drawing_func.(image, coordinates0, coordinates1, color)
   end
 
-
-
   # This is a conversion of the ruby library ChunkyPng's circle function
   # because ExPng does not support drawing circles.
   # Taken from: https://github.com/wvanbergen/chunky_png/blob/7a1faf62f10b12ad3170d563b998db7893eda845/lib/chunky_png/canvas/drawing.rb#L106 
@@ -76,21 +74,22 @@ defmodule ExPngExtensions do
       img
     end
 
-    img = Enum.with_index(lines)
-    |> Enum.reduce(img, fn {len, y_offset}, acc ->
-        acc = if len > 0 do
-          ExPng.Image.line(acc, {x0 - len, y0 - y_offset}, {x0 + len, y0 - y_offset}, stroke_color)
-        else
-          acc
-        end
-        acc = if len > 0 && y_offset > 0 do
-          ExPng.Image.line(acc, {x0 - len, y0 - y_offset}, {x0 + len, y0 - y_offset}, stroke_color)
-        else
-          acc
-        end
-
-        acc
-      end)
+    # Uncomment to add filling the circle a specific color
+    # img = Enum.with_index(lines)
+    # |> Enum.reduce(img, fn {len, y_offset}, acc ->
+    #     acc = if len > 0 do
+    #       ExPngExtensions.line(acc, {x0 - len, y0 - y_offset}, {x0 + len, y0 - y_offset}, ExPng.Color.white())
+    #     else
+    #       acc
+    #     end
+    #     acc = if len > 0 && y_offset > 0 do
+    #       ExPngExtensions.line(acc, {x0 - len, y0 + y_offset}, {x0 + len, y0 + y_offset}, ExPng.Color.white())
+    #     else
+    #       acc
+    #     end
+    #
+    #     acc
+    #   end)
     loop_circle(img, lines, f, dd_f_x, dd_f_y, x0, x, y0, y, stroke_color)
   end
   defp loop_circle(img, _lines, _f, _dd_f_x, _dd_f_y, _x0, _x, _y0, _y, _stroke_color) do
