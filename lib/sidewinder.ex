@@ -20,7 +20,8 @@ defmodule Sidewinder do
   defp update_cell(grid, cell, run) do
     cell = Grid.get_cell(grid, Cell.get_row_col(cell))
     new_run = run ++ [cell]
-    at_east = cell.east == nil
+    east = Grid.get_cell(grid, cell.row, cell.col + 1) |> Cell.get_row_col()
+    at_east = east == nil
     at_north = cell.north == nil
 
     should_close = at_east || (!at_north && Enum.random(0..1) == 0)
@@ -31,7 +32,7 @@ defmodule Sidewinder do
       {true, false} -> member = Enum.random(new_run)
               {Cell.link_cells(member, Grid.get_cell(grid, member.north)), []}
       {false, false} -> 
-        {new_cell, linked_cell} = Cell.link_cells(cell, Grid.get_cell(grid, cell.east))
+        {new_cell, linked_cell} = Cell.link_cells(cell, Grid.get_cell(grid, east))
         {{new_cell, linked_cell}, run ++ [new_cell]}
       {_, _} -> {{nil, nil}, []}
     end

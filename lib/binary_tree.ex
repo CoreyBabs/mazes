@@ -14,7 +14,7 @@ defmodule BinaryTree do
       north -> neighbors ++ [north]
     end
 
-    neighbors = case cell.east do
+    neighbors = case Grid.get_cell(grid, cell.row, cell.col + 1) |> Cell.get_row_col() do
       nil -> neighbors
       east -> neighbors ++ [east]
     end
