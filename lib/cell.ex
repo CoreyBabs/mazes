@@ -31,6 +31,12 @@ defmodule Cell do
     end
   end
 
+  def link_cells(%PolarCell{} = cell, linked) do
+    PolarCell.link_cells(cell, linked)
+  end
+  def link_cells(%HexCell{} = cell, linked) do
+    HexCell.link_cells(cell, linked)
+  end
   def link_cells(cell, linked) do
     new_cell = link(cell, linked)
     new_linked = link(linked, new_cell)
@@ -45,6 +51,12 @@ defmodule Cell do
     {new_cell, new_linked}
   end
 
+  def neighbors(%PolarCell{} = cell) do
+    PolarCell.neighbors(cell)
+  end
+  def neighbors(%HexCell{} = cell) do
+    HexCell.neighbors(cell)
+  end
   def neighbors(cell) do
     [cell.north, cell.east, cell.south, cell.west]
     |> Enum.filter(fn dir -> dir != nil end)

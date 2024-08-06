@@ -77,6 +77,12 @@ defmodule Grid do
     %Grid{grid | cells: new_cells}
   end
 
+  def update_grid_with_cells(%PolarGrid{} = grid, cells) do
+    PolarGrid.update_grid_with_cells(grid, cells)
+  end
+  def update_grid_with_cells(%HexGrid{} = grid, cells) do
+    HexGrid.update_grid_with_cells(grid, cells)
+  end
   def update_grid_with_cells(grid, cells) do
     Enum.reduce(cells, grid, fn cell, acc -> update_grid_with_cell(cell, acc) end)
   end
