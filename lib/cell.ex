@@ -37,6 +37,9 @@ defmodule Cell do
   def link_cells(%HexCell{} = cell, linked) do
     HexCell.link_cells(cell, linked)
   end
+  def link_cells(%TriangleCell{} = cell, linked) do
+    TriangleCell.link_cells(cell, linked)
+  end
   def link_cells(cell, linked) do
     new_cell = link(cell, linked)
     new_linked = link(linked, new_cell)
@@ -56,6 +59,9 @@ defmodule Cell do
   end
   def neighbors(%HexCell{} = cell) do
     HexCell.neighbors(cell)
+  end
+  def neighbors(%TriangleCell{} = cell) do
+    TriangleCell.neighbors(cell)
   end
   def neighbors(cell) do
     [cell.north, cell.east, cell.south, cell.west]
