@@ -182,6 +182,30 @@ defmodule Grid do
     end)
   end
 
+  def braid(grid, p \\ 1.0) do
+    grid
+    |> deadends()
+    |> Enum.shuffle()
+    |> Enum.reduce(grid, fn cell, acc ->
+      cell = get_cell(acc, cell.row, cell.col)
+      if Cell.links(cell) |> length() != 1 || :rand.uniform() > p do
+        acc
+      else
+        neighbors = Cell.neighbors(cell) |> Enum.reject(fn c -> Cell.linked?(cell, c) end)
+        best = Enum.filter(neighbors, fn c -> get_cell(acc, c) |> Cell.links() |> length() == 1 end)
+        best = case length(best) do
+          0 -> neighbors
+          _ -> best
+        end
+
+        neighbor = Enum.random(best)
+        neighbor = get_cell(acc , neighbor)
+        cells = Cell.link_cells(cell, neighbor) |> Tuple.to_list()
+        update_grid_with_cells(acc, cells)
+      end
+    end)
+  end
+
   defp distances_from_cell(grid, distances, frontier) do
     case frontier do
       [] -> distances
