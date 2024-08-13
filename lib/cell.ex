@@ -1,8 +1,8 @@
 defmodule Cell do
-  defstruct [:row, :col, :north, :south, :east, :west, :links]
+  defstruct [:row, :col, :north, :south, :east, :west, :links, :weight]
 
   def initialize(row, column) do
-    %Cell{row: row, col: column, links: %{}}
+    %Cell{row: row, col: column, links: %{}, weight: 1}
   end
 
   def link(cell, linked) do
@@ -54,6 +54,10 @@ defmodule Cell do
     {new_cell, new_linked}
   end
 
+  def add_weight(cell, weight) do
+    %Cell{cell | weight: weight}
+  end
+
   def neighbors(%PolarCell{} = cell) do
     PolarCell.neighbors(cell)
   end
@@ -99,6 +103,24 @@ defmodule Cell do
     end
   end
 
+  def background_color(dist, max, weight, use_weights) do
+    case use_weights do
+      true -> background_color(dist, max, weight)
+      false -> background_color(dist, max)
+    end
+  end
+  def background_color(dist, max, weight) do
+    if weight > 1 do
+      ExPng.Color.rgb(255, 0, 0)
+    else
+      case dist do
+        nil -> ExPng.Color.white()
+        _ -> 
+          intensity = (64 + 191 * (max - dist) / max) |> trunc()
+          ExPng.Color.rgb(intensity, intensity, 0)
+      end
+    end 
+  end 
   def background_color(dist, max) when max == 0 do
     color = case dist do
       nil -> ExPng.Color.white()

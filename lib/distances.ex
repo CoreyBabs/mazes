@@ -29,7 +29,7 @@ defmodule Distances do
   end
 
   def cells(distances) do
-    Map.keys(distances)
+    Map.keys(distances.cells)
   end
 
   def path_to(grid, distances, goal) do

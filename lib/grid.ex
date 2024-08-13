@@ -115,7 +115,7 @@ defmodule Grid do
     |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall) end) 
   end
 
-  def to_png_with_color(grid, cell_size, distances, max) do
+  def to_png_with_color(grid, cell_size, distances, max, use_weights \\ false) do
     cell_size = cell_size * 10
     img_width = cell_size * grid.cols
     img_height = cell_size * grid.rows
@@ -133,7 +133,7 @@ defmodule Grid do
             cell,
             acc,
             cell_size,
-            Cell.background_color(dist, max))
+            Cell.background_color(dist, max, cell.weight, use_weights))
         end) 
     end
 
@@ -168,13 +168,6 @@ defmodule Grid do
     update_grid_with_cell(new_cell, grid)
   end
 
-  def distances_from_cell(grid, cell) do
-    distances = Distances.initialize(cell)
-    frontier = [cell]
-
-    distances_from_cell(grid, distances, frontier)
-  end
-
   def deadends(grid) do
     Grid.each_cell(grid)
     |> Enum.filter(fn cell -> Cell.links(cell)
@@ -206,6 +199,14 @@ defmodule Grid do
     end)
   end
 
+  def distances_from_cell(grid, cell) do
+    distances = Distances.initialize(cell)
+    frontier = [cell]
+
+    distances_from_cell(grid, distances, frontier)
+  end
+
+
   defp distances_from_cell(grid, distances, frontier) do
     case frontier do
       [] -> distances
@@ -224,6 +225,41 @@ defmodule Grid do
     case Distances.distance(distances, linked) do
       nil -> {Distances.put(distances, linked, Distances.distance(distances, cell) + 1), frontier ++ [get_cell(grid, linked)]}
       _distance -> {distances, List.delete(frontier, cell)}
+    end
+  end
+
+  def weights_from_cell(grid, cell) do
+    weights = Distances.initialize(cell)
+    pending = [cell]
+
+    weights_from_cell(grid, weights, pending)
+  end
+
+  defp weights_from_cell(grid, weights, pending) do
+    case pending do
+      [] -> weights
+      _f -> 
+      {w, p} = Enum.reduce(pending, {weights, pending}, fn _c, {acc, np} -> 
+          cell = Enum.sort_by(np, fn c -> Distances.distance(acc, c) end) |> Enum.at(0)
+          np = List.delete_at(np, 0)
+
+          neighbors = Cell.links(cell)
+          Enum.reduce(neighbors, {acc, np}, fn n, {acc_w, acc_n} ->
+            neighbor = Grid.get_cell(grid, n)
+            total_weight = Distances.distance(acc_w, cell) + neighbor.weight
+            neighbor_weight = Distances.distance(acc, n)
+            if neighbor_weight == nil || total_weight < neighbor_weight do
+              acc_n = acc_n ++ [neighbor] 
+              acc_w = Distances.put(acc_w, neighbor, total_weight)
+              {acc_w, acc_n}
+            else
+              {acc_w, acc_n}
+            end
+          end)
+          
+        end)
+
+        weights_from_cell(grid, w, p)
     end
   end
 end
