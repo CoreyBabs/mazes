@@ -24,9 +24,8 @@ defmodule HuntAndKill do
   defp link_neighbor(grid, cell, unvisited) do
     neighbor = Enum.random(unvisited)
     neighbor = Grid.get_cell(grid, neighbor)
-    cells = Cell.link_cells(cell, neighbor) |> Tuple.to_list()
-    grid = Grid.update_grid_with_cells(grid, cells)
-    {grid, Grid.get_cell(grid, List.last(cells) |> Cell.get_row_col())}
+    grid = Grid.link_cells_and_update_grid(grid, cell, neighbor)
+    {grid, Grid.get_cell(grid, Cell.get_row_col(neighbor))}
   end
 
   defp hunt_for_neighbor(grid) do
@@ -44,9 +43,8 @@ defmodule HuntAndKill do
           |> Enum.random()
 
         neighbor = Grid.get_cell(grid, neighbor)
-        cells = Cell.link_cells(current, neighbor) |> Tuple.to_list()
-        grid = Grid.update_grid_with_cells(grid, cells)
-        {grid, Grid.get_cell(grid, List.first(cells) |> Cell.get_row_col())}
+        grid = Grid.link_cells_and_update_grid(grid, current, neighbor)
+        {grid, Grid.get_cell(grid, Cell.get_row_col(current))}
     end
   end
 end

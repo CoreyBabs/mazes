@@ -6,6 +6,7 @@ defmodule AldousBroder do
   end
 
   defp check_and_update_cell(grid, cell, unvisited) do
+    cell = Grid.get_cell(grid, Cell.get_row_col(cell))
     case unvisited do
       0 -> grid
       _ -> 
@@ -18,17 +19,18 @@ defmodule AldousBroder do
   defp link_random_cell(grid, cell, unvisited) do
     neighbor = Cell.neighbors(cell) |> Enum.random()
     neighbor = Grid.get_cell(grid, neighbor)
-    if Enum.empty?(Cell.links(neighbor)) do
-      new_cells = Cell.link_cells(cell, neighbor) 
-      {new_cells, unvisited - 1}
+    unvisited = if Enum.empty?(Cell.links(neighbor)) do
+      unvisited - 1
     else
-      {{cell, neighbor}, unvisited}
+      unvisited 
     end
+
+    {{cell, neighbor}, unvisited}
   end
 
-  defp update_grid_with_cells(grid, new_cells, update) do
+  defp update_grid_with_cells(grid, {cell, linked}, update) do
     if update do
-      Grid.update_grid_with_cells(grid, Tuple.to_list(new_cells))
+      Grid.link_cells_and_update_grid(grid, cell, linked)
     else
       grid
     end

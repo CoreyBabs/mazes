@@ -61,6 +61,9 @@ defmodule Grid do
     Enum.map(grid.cells, fn row -> row end)
   end
 
+  def each_cell(%WeaveGrid{} = grid) do
+    WeaveGrid.each_cell(grid)
+  end
   def each_cell(grid) do
     each_row(grid)
     |> Enum.flat_map(fn col -> col end)
@@ -77,17 +80,33 @@ defmodule Grid do
     %Grid{grid | cells: new_cells}
   end
 
-  def update_grid_with_cells(%PolarGrid{} = grid, cells) do
+  defp update_grid_with_cells(%PolarGrid{} = grid, cells) do
     PolarGrid.update_grid_with_cells(grid, cells)
   end
-  def update_grid_with_cells(%HexGrid{} = grid, cells) do
+  defp update_grid_with_cells(%HexGrid{} = grid, cells) do
     HexGrid.update_grid_with_cells(grid, cells)
   end
-  def update_grid_with_cells(%TriangleGrid{} = grid, cells) do
+  defp update_grid_with_cells(%TriangleGrid{} = grid, cells) do
     TriangleGrid.update_grid_with_cells(grid, cells)
   end
-  def update_grid_with_cells(grid, cells) do
+  defp update_grid_with_cells(grid, cells) do
     Enum.reduce(cells, grid, fn cell, acc -> update_grid_with_cell(cell, acc) end)
+  end
+
+  def link_cells_and_update_grid(grid, cell, linked) when cell == nil or linked == nil do
+    grid
+  end
+  def link_cells_and_update_grid(%WeaveGrid{} = grid, cell, linked) do
+    result = OverCell.link_cells(cell, linked) 
+    case result do
+      {n, :tunnel} -> WeaveGrid.tunnel_under(grid, Grid.get_cell(grid, n))
+      {c, n} -> WeaveGrid.update_grid_with_cells(grid, [c, n])
+    end
+    |> WeaveGrid.update_cells_with_grid()
+  end
+  def link_cells_and_update_grid(grid, cell, linked) do
+    cells = Cell.link_cells(cell, linked) |> Tuple.to_list()
+    update_grid_with_cells(grid, cells)
   end
 
   def to_string(grid, distances \\ nil) do
@@ -102,17 +121,18 @@ defmodule Grid do
     end)
   end
 
-  def to_png(grid, cell_size) do
+  def to_png(grid, cell_size \\ 10, inset \\ 0) do
     cell_size = cell_size * 10
     img_width = cell_size * grid.cols
     img_height = cell_size * grid.rows
+    inset = (cell_size * inset) |> trunc()
 
     wall = ExPng.Color.black()
 
     img = ExPng.Image.new(img_width + 1, img_height + 1)
 
     each_cell(grid)
-    |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall) end) 
+    |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall, inset) end) 
   end
 
   def to_png_with_color(grid, cell_size, distances, max, use_weights \\ false) do
@@ -138,7 +158,7 @@ defmodule Grid do
     end
 
     each_cell(grid)
-    |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall) end) 
+    |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall, 0) end) 
   end
 
   def get_cell(_grid, row, col) when row < 0 or col < 0 do
@@ -151,6 +171,9 @@ defmodule Grid do
     end
   end
   def get_cell(_grid, {row, col}) when row < 0 or col < 0 do
+    nil
+  end
+  def get_cell(_grid, location) when location == nil do
     nil
   end
   def get_cell(grid, {row, col}) do

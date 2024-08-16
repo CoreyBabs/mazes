@@ -19,8 +19,7 @@ defmodule RecursiveBacktracker do
           [] -> loop_through_stack(grid, List.delete_at(stack, -1))
           _ ->
             neighbor = Enum.random(neighbors)
-            cells = Cell.link_cells(current, neighbor) |> Tuple.to_list()
-            grid = Grid.update_grid_with_cells(grid, cells)
+            grid = Grid.link_cells_and_update_grid(grid, current, neighbor)
             stack = stack ++ [Grid.get_cell(grid, Cell.get_row_col(neighbor))]
             loop_through_stack(grid, stack)
         end

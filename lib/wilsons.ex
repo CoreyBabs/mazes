@@ -23,8 +23,7 @@ defmodule Wilsons do
           n = Enum.at(path, i + 1) |> Cell.get_row_col()
           n = Grid.get_cell(acc_g, n)
           
-          cells = Cell.link_cells(c, n)
-          g = Grid.update_grid_with_cells(acc_g, Tuple.to_list(cells))
+          g = Grid.link_cells_and_update_grid(acc_g, c, n)
           u = Enum.filter(acc_u, fn uc -> !Cell.eq?(c, uc) end)
 
           {g, u}
