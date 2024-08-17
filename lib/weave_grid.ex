@@ -3,17 +3,17 @@ defmodule WeaveGrid do
   defstruct [:rows, :cols, :cells, mask: nil, under_cells: []]
 
 
-  def initialize(rows, cols) do
+  def initialize(rows, cols, preconfigured \\ false) do
     %WeaveGrid{rows: rows, cols: cols} 
-    |> prepare_grid()
+    |> prepare_grid(preconfigured)
     |> configure_cells()
   end
 
-  def prepare_grid(grid) do
+  def prepare_grid(grid, preconfigred) do
     cells = Enum.map(0..grid.rows - 1, fn row ->
       Enum.map(0..grid.cols - 1, fn col ->
         if grid.mask == nil or Mask.get(grid.mask, row, col) do
-          OverCell.initialize(row, col)
+          OverCell.initialize(row, col, preconfigred)
         else
           nil
         end

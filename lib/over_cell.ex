@@ -1,22 +1,25 @@
 defmodule OverCell do
-  defstruct [:row, :col, :north, :south, :east, :west, :links, :weight, :grid]
+  defstruct [:row, :col, :north, :south, :east, :west, :links, :weight, :grid, :simple]
 
-  def initialize(row, column) do
-    %OverCell{row: row, col: column, links: %{}, weight: 1, grid: nil}
+  def initialize(row, column, simple) do
+    %OverCell{row: row, col: column, links: %{}, weight: 1, grid: nil, simple: simple}
   end
 
   def neighbors(cell) do
     list = normal_neighbors(cell)
+    if !cell.simple do
+      north = Grid.get_cell(cell.grid, cell.north)
+      south = Grid.get_cell(cell.grid, cell.south)
+      east = Grid.get_cell(cell.grid, cell.east)
+      west = Grid.get_cell(cell.grid, cell.west)
 
-    north = Grid.get_cell(cell.grid, cell.north)
-    south = Grid.get_cell(cell.grid, cell.south)
-    east = Grid.get_cell(cell.grid, cell.east)
-    west = Grid.get_cell(cell.grid, cell.west)
-
-    list = if can_tunnel_north?(north), do: list ++ [north.north], else: list
-    list = if can_tunnel_south?(south), do: list ++ [south.south], else: list
-    list = if can_tunnel_east?(east), do: list ++ [east.east], else: list
-    if can_tunnel_west?(west), do: list ++ [west.west], else: list
+      list = if can_tunnel_north?(north), do: list ++ [north.north], else: list
+      list = if can_tunnel_south?(south), do: list ++ [south.south], else: list
+      list = if can_tunnel_east?(east), do: list ++ [east.east], else: list
+      if can_tunnel_west?(west), do: list ++ [west.west], else: list
+    else
+      list
+    end
   end
 
   defp normal_neighbors(cell) do
