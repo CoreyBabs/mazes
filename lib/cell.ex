@@ -24,6 +24,9 @@ defmodule Cell do
   def linked?(cell, other_cell) when is_tuple(other_cell) do
     Map.has_key?(cell.links, other_cell)
   end
+  def linked?(%Cell3d{} = cell, %Cell3d{} = other_cell) do
+    linked?(cell, Cell3d.get_location(other_cell))
+  end
   def linked?(cell, other_cell) do
     case other_cell do
       nil -> false
@@ -42,6 +45,9 @@ defmodule Cell do
   end
   def link_cells(%OverCell{} = cell, linked) do
     OverCell.link_cells(cell, linked)
+  end
+  def link_cells(%Cell3d{} = cell, linked) do
+    Cell3d.link_cells(cell, linked)
   end
   def link_cells(cell, linked) do
     new_cell = link(cell, linked)
@@ -72,6 +78,9 @@ defmodule Cell do
   end
   def neighbors(%OverCell{} = cell) do
     OverCell.neighbors(cell)
+  end
+  def neighbors(%Cell3d{} = cell) do
+    Cell3d.neighbors(cell)
   end
   def neighbors(cell) do
     [cell.north, cell.east, cell.south, cell.west]
@@ -182,22 +191,30 @@ defmodule Cell do
     end
   end
   def draw_walls(%OverCell{} = cell, image, cell_size, wall, inset) do
-    draw_walls_with_inset(cell, image, cell_size, wall, inset) 
+    draw_walls_with_inset(cell, image, cell_size, wall, inset, cell.col, cell.row) 
   end
   def draw_walls(cell, image, cell_size, wall, inset) do
     case inset do
-      0 -> draw_walls(cell, image, cell_size, wall)
-      _ -> draw_walls_with_inset(cell, image, cell_size, wall, inset)
+      0 -> draw_walls(cell, image, cell_size, wall, cell.col, cell.row)
+      _ -> draw_walls_with_inset(cell, image, cell_size, wall, inset, cell.col, cell.row)
     end 
   end
-  defp draw_walls(cell, image, _cell_size, _wall) when cell == nil do
+  def draw_walls(cell, image, _cell_size, _wall, _x, _y) when cell == nil do
     image
   end
-  defp draw_walls(cell, image, cell_size, wall) do
-    x1 = cell.col * cell_size
-    y1 = cell.row * cell_size 
-    x2 = (cell.col + 1) * cell_size
-    y2 = (cell.row + 1) * cell_size
+  def draw_walls(cell, image, cell_size, wall, x, y, multiply \\ true) do
+    scale = if multiply, do: cell_size, else: 1
+    x1 = x * scale
+    y1 = y * scale
+    {x2, y2} = if multiply do
+      x2 = (x + 1) * cell_size
+      y2 = (y + 1) * cell_size
+      {x2, y2}
+    else
+      x2 = x + cell_size
+      y2 = y + cell_size
+      {x2, y2}
+    end
 
     image = case cell.north do
       nil -> ExPng.Image.line(image, {x1, y1}, {x2, y1}, wall)
@@ -220,11 +237,11 @@ defmodule Cell do
     end
   end
 
-  defp draw_walls_with_inset(cell, image, cell_size, wall, inset) do
+  def draw_walls_with_inset(cell, image, cell_size, wall, inset, x, y) do
     [x1, x2, x3, x4,
       y1, y2, y3, y4] = cell_coordinates_with_inset(
-        cell.col * cell_size,
-        cell.row * cell_size,
+        x * cell_size,
+        y * cell_size,
         cell_size,
         inset)
 
@@ -270,6 +287,9 @@ defmodule Cell do
     [x1, x2, x3, x4, y1, y2, y3, y4]
   end
 
+  def get_row_col(%Cell3d{} = cell) do
+    Cell3d.get_location(cell)
+  end
   def get_row_col(cell) do
     case cell do
       nil -> nil
@@ -277,6 +297,9 @@ defmodule Cell do
     end
   end
 
+  def eq?(%Cell3d{} = cell, other) do
+    cell.row === other.row && cell.col === other.col && cell.level === other.level
+  end
   def eq?(cell, other) do
     cell.row === other.row && cell.col === other.col
   end

@@ -39,6 +39,9 @@ defmodule Grid do
     end)
   end
 
+  def random_cell(%Grid3d{} = grid) do
+    Grid3d.random_cell(grid)
+  end
   def random_cell(grid) when grid.mask != nil do
     {rand_row, rand_col} = Mask.random_location(grid.mask)
     get_cell(grid, rand_row, rand_col)
@@ -64,6 +67,9 @@ defmodule Grid do
   def each_cell(%WeaveGrid{} = grid) do
     WeaveGrid.each_cell(grid)
   end
+  def each_cell(%Grid3d{} = grid) do
+    Grid3d.each_cell(grid)
+  end
   def each_cell(grid) do
     each_row(grid)
     |> Enum.flat_map(fn col -> col end)
@@ -88,6 +94,9 @@ defmodule Grid do
   end
   defp update_grid_with_cells(%TriangleGrid{} = grid, cells) do
     TriangleGrid.update_grid_with_cells(grid, cells)
+  end
+  defp update_grid_with_cells(%Grid3d{} = grid, cells) do
+    Grid3d.update_grid_with_cells(grid, cells)
   end
   defp update_grid_with_cells(grid, cells) do
     Enum.reduce(cells, grid, fn cell, acc -> update_grid_with_cell(cell, acc) end)
@@ -176,6 +185,9 @@ defmodule Grid do
   def get_cell(_grid, location) when location == nil do
     nil
   end
+  def get_cell(%Grid3d{} = grid, {level, row, col}) do
+    Grid3d.get_cell(grid, level, row, col)
+  end 
   def get_cell(grid, {row, col}) do
     case Enum.at(grid.cells, row) do
       nil -> nil
