@@ -78,6 +78,9 @@ defmodule Grid do
   def update_grid_with_cell(cell, grid) when cell == nil do
     grid
   end
+  def update_grid_with_cell(cell, %CylinderGrid{} = grid) do
+    CylinderGrid.update_grid_with_cell(cell, grid)
+  end
   def update_grid_with_cell(cell, grid) do
     new_col = Enum.at(grid.cells, cell.row)
     |> List.update_at(cell.col, fn _ -> cell end)
@@ -173,6 +176,9 @@ defmodule Grid do
   def get_cell(_grid, row, col) when row < 0 or col < 0 do
     nil
   end  
+  def get_cell(%CylinderGrid{} = grid, row, col) do
+    CylinderGrid.get_cell(grid, row, col)
+  end 
   def get_cell(grid, row, col) do
     case Enum.at(grid.cells, row) do
       nil -> nil
@@ -187,6 +193,9 @@ defmodule Grid do
   end
   def get_cell(%Grid3d{} = grid, {level, row, col}) do
     Grid3d.get_cell(grid, level, row, col)
+  end 
+  def get_cell(%CylinderGrid{} = grid, {row, col}) do
+    CylinderGrid.get_cell(grid, row, col)
   end 
   def get_cell(grid, {row, col}) do
     case Enum.at(grid.cells, row) do
