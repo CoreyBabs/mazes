@@ -53,6 +53,19 @@ defmodule Grid do
     get_cell(grid, rand_row, rand_col)
   end
 
+  def has_unlinked_cell?(grid) when grid.mask != nil do
+    each_cell(grid)
+    |> Enum.filter(fn c -> c != nil && Mask.get(grid.mask, c.row, c.col) end)
+    |> Enum.filter(fn c -> Cell.neighbors(c) |> Enum.any?() end)
+    |> Enum.any?(fn c -> Cell.links(c) |> Enum.empty?() end)
+  end
+  def has_unlinked_cell?(grid) do
+    each_cell(grid)
+    |> Enum.filter(fn c -> c != nil end)
+    |> Enum.filter(fn c -> Cell.neighbors(c) |> Enum.any?() end)
+    |> Enum.any?(fn c -> Cell.links(c) |> Enum.empty?() end)
+  end
+
   def size(grid) do
     case grid.mask do
       nil -> grid.rows * grid.cols
@@ -134,14 +147,14 @@ defmodule Grid do
   end
 
   def to_png(grid, cell_size \\ 10, inset \\ 0) do
-    cell_size = cell_size * 10
+    cell_size = cell_size
     img_width = cell_size * grid.cols
     img_height = cell_size * grid.rows
     inset = (cell_size * inset) |> trunc()
 
     wall = ExPng.Color.black()
 
-    img = ExPng.Image.new(img_width + 1, img_height + 1)
+    img = ExPng.Image.new(img_width, img_height)
 
     each_cell(grid)
     |> Enum.reduce(img, fn cell, acc -> Cell.draw_walls(cell, acc, cell_size, wall, inset) end) 

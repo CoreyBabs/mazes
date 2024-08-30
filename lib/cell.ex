@@ -193,6 +193,9 @@ defmodule Cell do
   def draw_walls(%OverCell{} = cell, image, cell_size, wall, inset) do
     draw_walls_with_inset(cell, image, cell_size, wall, inset, cell.col, cell.row) 
   end
+  def draw_walls(cell, image, _cell_size, _wall, _inset) when cell == nil do
+    image
+  end
   def draw_walls(cell, image, cell_size, wall, inset) do
     case inset do
       0 -> draw_walls(cell, image, cell_size, wall, cell.col, cell.row)

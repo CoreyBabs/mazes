@@ -90,12 +90,15 @@ defmodule Mask do
 
   def from_png(file) do
     {:ok, image} = ExPng.Image.from_file(file)
-    mask = initialize(image.width, image.height)
+    mask = initialize(image.height, image.width)
 
     Enum.reduce(0..mask.rows - 1, mask, fn row, acc ->
       Enum.reduce(0..mask.cols - 1, acc, fn col, acc_m ->
-        pixel = ExPng.Image.at(image, {col, row})  
-        set(acc_m, row, col, pixel != ExPng.Color.black())
+        pixel = ExPng.Image.at(image, {col, row})
+        <<r, g, b, _a>> = pixel
+        threshold = 192
+        mask_in = r >= threshold && g >= threshold && b >= threshold
+        set(acc_m, row, col, mask_in)
       end)
     end) 
 
