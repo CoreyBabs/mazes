@@ -5,5 +5,5 @@ was made using a [modified recursive backtracking algorithm](https://github.com/
 modifications to the traditional recursive backtracking algorithm were to make it so the algorithm could work on non connected areas of a mask.
 Click the thumbnail to watch the video!
 
-[![Bad Apple but it's a maze](https://img.youtube.com/vi/gQJh3J6ASV8/0.jpg)](https://www.youtube.com/watch?v=YgQJh3J6ASV8)
+[![Bad Apple but it's a maze](https://img.youtube.com/vi/gQJh3J6ASV8/0.jpg)](https://www.youtube.com/watch?v=gQJh3J6ASV8)
 
